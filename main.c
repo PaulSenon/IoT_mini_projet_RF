@@ -39,17 +39,27 @@
 #include "extdrv/ssd130x_oled_driver.h"
 #include "extdrv/ssd130x_oled_buffer.h"
 #include "lib/font.h"
+#include "extdrv/cc1101.h"
 
 #define MODULE_VERSION	0x03
 #define MODULE_NAME "RF Sub1G - USB"
 
 #define DEBUG 1
 #define BUFF_LEN 60
+#define RF_BUFF_LEN  64
 
 #define SELECTED_FREQ  FREQ_SEL_48MHz
 
-static volatile uint32_t update_display = 0;
+#define RF_868MHz  1
+#define RF_915MHz  0
+#if ((RF_868MHz) + (RF_915MHz) != 1)
+#error Either RF_868MHz or RF_915MHz MUST be defined.
+#endif
 
+#define DEVICE_ADDRESS  0x02 /* Addresses 0x00 and 0xFF are broadcast */
+#define NEIGHBOR_ADDRESS 0x01 /* Address of the associated device */
+
+static volatile uint32_t update_display = 0;
 /***************************************************************************** */
 /* Pins configuration */
 /* pins blocks are passed to set_pins() for pins configuration.
@@ -72,12 +82,15 @@ const struct pio_config common_pins[] = {
 	ARRAY_LAST_PIO,
 };
 
-
+const struct pio cc1101_cs_pin = LPC_GPIO_0_15;
+const struct pio cc1101_miso_pin = LPC_SSP0_MISO_PIO_0_16;
+const struct pio cc1101_gdo0 = LPC_GPIO_0_6;
+const struct pio cc1101_gdo2 = LPC_GPIO_0_7;
 const struct pio temp_alert = LPC_GPIO_0_3;
 const struct pio status_led_green = LPC_GPIO_0_28;
 const struct pio status_led_red = LPC_GPIO_0_29;
 
-
+const struct pio button = LPC_GPIO_0_12; /* ISP button */
 
 /***************************************************************************** */
 void system_init()
@@ -103,6 +116,119 @@ void fault_info(const char* name, uint32_t len)
 {
 	uprintf(UART0, name);
 	while (1);
+}
+
+/***************************************************************************** */
+/* RFDUCUL */
+static volatile int check_rx = 0;
+void rf_rx_calback(uint32_t gpio)
+{
+	check_rx = 1;
+}
+
+static uint8_t rf_specific_settings[] = {
+	CC1101_REGS(gdo_config[2]), 0x07, /* GDO_0 - Assert on CRC OK | Disable temp sensor */
+	CC1101_REGS(gdo_config[0]), 0x2E, /* GDO_2 - FIXME : do something usefull with it for tests */
+	CC1101_REGS(pkt_ctrl[0]), 0x0F, /* Accept all sync, CRC err auto flush, Append, Addr check and Bcast */
+#if (RF_915MHz == 1)
+	/* FIXME : Add here a define protected list of settings for 915MHz configuration */
+#endif
+};
+
+/* RF config */
+void rf_config(void)
+{
+	config_gpio(&cc1101_gdo0, LPC_IO_MODE_PULL_UP, GPIO_DIR_IN, 0);
+	cc1101_init(0, &cc1101_cs_pin, &cc1101_miso_pin); /* ssp_num, cs_pin, miso_pin */
+	/* Set default config */
+	cc1101_config();
+	/* And change application specific settings */
+	cc1101_update_config(rf_specific_settings, sizeof(rf_specific_settings));
+	set_gpio_callback(rf_rx_calback, &cc1101_gdo0, EDGE_RISING);
+    cc1101_set_address(DEVICE_ADDRESS);
+#ifdef DEBUG
+	uprintf(UART0, "CC1101 RF link init done.\n\r");
+#endif
+}
+
+uint8_t chenillard_active = 1;
+void handle_rf_rx_data(void)
+{
+	uint8_t data[RF_BUFF_LEN];
+	int8_t ret = 0;
+	uint8_t status = 0;
+
+	/* Check for received packet (and get it if any) */
+	ret = cc1101_receive_packet(data, RF_BUFF_LEN, &status);
+	/* Go back to RX mode */
+	cc1101_enter_rx_mode();
+	uprintf(UART0, "DATA: %s\n\r", data);
+
+#ifdef DEBUG
+	uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
+    uprintf(UART0, "RF: data lenght: %d.\n\r", data[0]);
+    uprintf(UART0, "RF: destination: %x.\n\r", data[1]);
+    uprintf(UART0, "RF: message: %c.\n\r", data[2]);
+#endif
+	switch (data[2]) {
+		case '0':
+			{
+				chenillard_active = 0;
+
+			}
+			break;
+		case '1':
+			{
+				chenillard_active = 1 ;
+			}
+			break;
+	}
+}
+
+static volatile uint32_t cc_tx = 0;
+static volatile uint8_t cc_tx_buff[RF_BUFF_LEN];
+static volatile uint8_t cc_ptr = 0;
+uint8_t chenillard_activation_request = 1;
+void activate_chenillard(uint32_t gpio) {
+	if (chenillard_activation_request == 1){
+        cc_tx_buff[0]='0';
+        cc_ptr = 1;
+        cc_tx=1;
+        chenillard_activation_request = 0;
+    }
+    else{
+        cc_tx_buff[0]='1';
+        cc_ptr = 1;
+        cc_tx=1;
+        chenillard_activation_request = 1;
+    }
+}
+
+void send_on_rf(void)
+{
+	uint8_t cc_tx_data[RF_BUFF_LEN + 2];
+	uint8_t tx_len = cc_ptr;
+	int ret = 0;
+
+	/* Create a local copy */
+	memcpy((char*)&(cc_tx_data[2]), (char*)cc_tx_buff, tx_len);
+	/* "Free" the rx buffer as soon as possible */
+	cc_ptr = 0;
+	/* Prepare buffer for sending */
+	cc_tx_data[0] = tx_len + 1;
+	cc_tx_data[1] = NEIGHBOR_ADDRESS; /* WHO IS THE NEIGHBOR ? */
+	/* Send */
+	if (cc1101_tx_fifo_state() != 0) {
+		cc1101_flush_tx_fifo();
+	}
+	ret = cc1101_send_packet(cc_tx_data, (tx_len + 2));
+
+#ifdef DEBUG
+	uprintf(UART0, "Tx ret: %d\n\r", ret);
+    uprintf(UART0, "RF: data lenght: %d.\n\r", cc_tx_data[0]);
+    uprintf(UART0, "RF: destination: %x.\n\r", cc_tx_data[1]);
+    uprintf(UART0, "RF: message: %c.\n\r", cc_tx_data[2]);
+#endif
 }
 
 /***************************************************************************** */
@@ -356,13 +482,20 @@ int main(void)
 	int ret = 0;
 	system_init();
 	uart_on(UART0, 115200, NULL);
+	ssp_master_on(0, LPC_SSP_FRAME_SPI, 8, 4*1000*1000); /* bus_num, frame_type, data_width, rate */
 	i2c_on(I2C0, I2C_CLK_100KHz, I2C_MASTER);
 	status_led_config(&status_led_green, &status_led_red);
+
+	/* Radio */
+	rf_config();
 
 	/* Sensors config */
 	bme_config(UART0);
 	uv_config(UART0);
 	lux_config(UART0);
+
+	/* Activate the chenillard on Rising edge (button release) */
+	set_gpio_callback(activate_chenillard, &button, EDGE_RISING);
 
 	/* Configure and start display */
 	ret = ssd130x_display_on(&display);
@@ -377,12 +510,49 @@ int main(void)
 	uprintf(UART0, "App started\n\r");
 
 	while (1) {
-		
+		uint8_t status = 0;
+
 		/* Request a Temp conversion on I2C TMP101 temperature sensor */
 		// tmp101_sensor_start_conversion(&tmp101_sensor); /* A conversion takes about 40ms */
 		
-		/* Tell we are alive :) */
-		chenillard(250);
+		/* Verify that chenillard is enable */
+        if (chenillard_active == 1) {
+			/* Tell we are alive :) */
+		    chenillard(250);
+        }
+        else{
+            status_led(none);
+			msleep(250);
+        }
+
+		/* Radio */
+		/* RF */
+		if (cc_tx == 1) {
+			send_on_rf();
+			cc_tx = 0;
+		}
+		/* Do not leave radio in an unknown or unwated state */
+		do {
+			status = (cc1101_read_status() & CC1101_STATE_MASK);
+		} while (status == CC1101_STATE_TX);
+		if (status != CC1101_STATE_RX) {
+			static uint8_t loop = 0;
+			loop++;
+			if (loop > 10) {
+				if (cc1101_rx_fifo_state() != 0) {
+					cc1101_flush_rx_fifo();
+				}
+				cc1101_enter_rx_mode();
+				loop = 0;
+			}
+		}
+		if (check_rx == 1) {
+			check_rx = 0;
+			handle_rf_rx_data();
+		}
+
+
+
 
 		/* Display */
 		if (update_display == 1) {
