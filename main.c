@@ -25,6 +25,7 @@
 #include "core/system.h"
 #include "core/systick.h"
 #include "core/pio.h"
+// #include <stdio.h>
 #include "lib/stdio.h"
 #include "drivers/serial.h"
 #include "drivers/gpio.h"
@@ -58,6 +59,11 @@
 
 #define DEVICE_ADDRESS  0x02 /* Addresses 0x00 and 0xFF are broadcast */
 #define NEIGHBOR_ADDRESS 0x01 /* Address of the associated device */
+
+#define SALT 864
+
+uint16_t uv = 0, ir = 0, humidity = 0;
+uint32_t pressure = 0, temp = 0, lux = 0;
 
 static volatile uint32_t update_display = 0;
 /***************************************************************************** */
@@ -170,38 +176,86 @@ void handle_rf_rx_data(void)
     uprintf(UART0, "RF: destination: %x.\n\r", data[1]);
     uprintf(UART0, "RF: message: %c.\n\r", data[2]);
 #endif
-	switch (data[2]) {
-		case '0':
-			{
-				chenillard_active = 0;
+	// switch (data[2]) {
+	// 	case '0':
+	// 		{
+	// 			chenillard_active = 0;
 
-			}
-			break;
-		case '1':
-			{
-				chenillard_active = 1 ;
-			}
-			break;
-	}
+	// 		}
+	// 		break;
+	// 	case '1':
+	// 		{
+	// 			chenillard_active = 1 ;
+	// 		}
+	// 		break;
+	// }
 }
 
 static volatile uint32_t cc_tx = 0;
 static volatile uint8_t cc_tx_buff[RF_BUFF_LEN];
 static volatile uint8_t cc_ptr = 0;
-uint8_t chenillard_activation_request = 1;
-void activate_chenillard(uint32_t gpio) {
-	if (chenillard_activation_request == 1){
-        cc_tx_buff[0]='0';
-        cc_ptr = 1;
-        cc_tx=1;
-        chenillard_activation_request = 0;
-    }
-    else{
-        cc_tx_buff[0]='1';
-        cc_ptr = 1;
-        cc_tx=1;
-        chenillard_activation_request = 1;
-    }
+// uint8_t chenillard_activation_request = 1;
+// void activate_chenillard(uint32_t gpio) {
+// 	if (chenillard_activation_request == 1){
+//         cc_tx_buff[0]='0';
+//         cc_ptr = 1;
+//         cc_tx=1;
+//         chenillard_activation_request = 0;
+//     }
+//     else{
+//         cc_tx_buff[0]='1';
+//         cc_ptr = 1;
+//         cc_tx=1;
+//         chenillard_activation_request = 1;
+//     }
+// }
+
+int indexValueToSend = 0;
+#define NB_VALUES 6
+void mettageDansLeBuffer(uint32_t gpio){
+	char message[15];
+	int len = 15;
+	switch (indexValueToSend%NB_VALUES){
+		case 0:
+			// message = snprintf("%d:T:%d", SALT, temp);
+			snprintf ( message, 15, "%d:T:%d", SALT, temp );
+			len = strlen(message);
+			break;
+		case 1:
+			// message = snprintf("%d:H:%d", 15, SALT, humidity);
+			snprintf ( message, 15, "%d:H:%d", SALT, humidity );
+			len = strlen(message);
+			break;
+		case 2:
+			// message = snprintf("%d:P:%d", 15, SALT, pressure);
+			snprintf ( message, 15, "%d:P:%d", SALT, pressure );
+			len = strlen(message);
+			break;
+		case 3:
+			// message = snprintf("%d:I:%d", 15, SALT, ir);
+			snprintf ( message, 15, "%d:I:%d", SALT, ir );
+			len = strlen(message);
+			break;
+		case 4:
+			// message = snprintf("%d:U:%d", 15, SALT, uv);
+			snprintf ( message, 15, "%d:U:%d", SALT, uv );
+			len = strlen(message);
+			break;
+		case 5:
+			// message = snprintf("%d:L:%d", 15, SALT, lux);
+			snprintf ( message, 15, "%d:L:%d", SALT, lux );
+			len = strlen(message);
+			break;
+		default:
+			// message = "Lol ça marche pas";
+			// len = strlen(message);
+			break;
+	}
+
+	memcpy((char*)&(cc_tx_buff[0]), message, len);
+	cc_ptr = len;
+    cc_tx=1;
+	indexValueToSend ++;
 }
 
 void send_on_rf(void)
@@ -224,6 +278,8 @@ void send_on_rf(void)
 	ret = cc1101_send_packet(cc_tx_data, (tx_len + 2));
 
 #ifdef DEBUG
+	uprintf(UART0, "BUFF %s \n\r", cc_tx_buff);
+	uprintf(UART0, "DATA %s \n\r", cc_tx_data);
 	uprintf(UART0, "Tx ret: %d\n\r", ret);
     uprintf(UART0, "RF: data lenght: %d.\n\r", cc_tx_data[0]);
     uprintf(UART0, "RF: destination: %x.\n\r", cc_tx_data[1]);
@@ -461,8 +517,6 @@ void periodic_display(uint32_t tick)
 	update_display = 1;
 }
 
-
-#define SALT 864
 /**
  * Les data sont envoyées sous ce format.
  * Le SALT est sert juste à prefixer de manière "unique"
@@ -476,7 +530,6 @@ void periodic_display(uint32_t tick)
  *  UV 			SALT+":U:1234"
  *  lux			SALT+":L:1234"
  */
-
 int main(void)
 {
 	int ret = 0;
@@ -495,7 +548,7 @@ int main(void)
 	lux_config(UART0);
 
 	/* Activate the chenillard on Rising edge (button release) */
-	set_gpio_callback(activate_chenillard, &button, EDGE_RISING);
+	set_gpio_callback(mettageDansLeBuffer, &button, EDGE_RISING);
 
 	/* Configure and start display */
 	ret = ssd130x_display_on(&display);
@@ -515,15 +568,8 @@ int main(void)
 		/* Request a Temp conversion on I2C TMP101 temperature sensor */
 		// tmp101_sensor_start_conversion(&tmp101_sensor); /* A conversion takes about 40ms */
 		
-		/* Verify that chenillard is enable */
-        if (chenillard_active == 1) {
-			/* Tell we are alive :) */
-		    chenillard(250);
-        }
-        else{
-            status_led(none);
-			msleep(250);
-        }
+		/* Tell we are alive :) */
+		chenillard(250);
 
 		/* Radio */
 		/* RF */
@@ -559,9 +605,6 @@ int main(void)
 			uprintf(UART0, "Updating display\n\r");
 			
 			char data[20];
-
-			uint16_t uv = 0, ir = 0, humidity = 0;
-			uint32_t pressure = 0, temp = 0, lux = 0;
 			
 			/* Read the sensors */
 			uv_display(UART0, &uv);
