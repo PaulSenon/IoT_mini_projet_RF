@@ -57,10 +57,11 @@
 #error Either RF_868MHz or RF_915MHz MUST be defined.
 #endif
 
-#define DEVICE_ADDRESS  0x02 /* Addresses 0x00 and 0xFF are broadcast */
-#define NEIGHBOR_ADDRESS 0x01 /* Address of the associated device */
+#define DEVICE_ADDRESS  0x34 /* Addresses 0x00 and 0xFF are broadcast */
+#define NEIGHBOR_ADDRESS 0x61 /* Address of the associated device */
 
-#define SALT 864
+#define SALT 1567464
+#define ID 1
 
 uint16_t uv = 0, ir = 0, humidity = 0;
 uint32_t pressure = 0, temp = 0, lux = 0;
@@ -213,49 +214,58 @@ static volatile uint8_t cc_ptr = 0;
 int indexValueToSend = 0;
 #define NB_VALUES 6
 void mettageDansLeBuffer(uint32_t gpio){
-	char message[15];
-	int len = 15;
-	switch (indexValueToSend%NB_VALUES){
-		case 0:
-			// message = snprintf("%d:T:%d", SALT, temp);
-			snprintf ( message, 15, "%d:T:%d", SALT, temp );
-			len = strlen(message);
-			break;
-		case 1:
-			// message = snprintf("%d:H:%d", 15, SALT, humidity);
-			snprintf ( message, 15, "%d:H:%d", SALT, humidity );
-			len = strlen(message);
-			break;
-		case 2:
-			// message = snprintf("%d:P:%d", 15, SALT, pressure);
-			snprintf ( message, 15, "%d:P:%d", SALT, pressure );
-			len = strlen(message);
-			break;
-		case 3:
-			// message = snprintf("%d:I:%d", 15, SALT, ir);
-			snprintf ( message, 15, "%d:I:%d", SALT, ir );
-			len = strlen(message);
-			break;
-		case 4:
-			// message = snprintf("%d:U:%d", 15, SALT, uv);
-			snprintf ( message, 15, "%d:U:%d", SALT, uv );
-			len = strlen(message);
-			break;
-		case 5:
-			// message = snprintf("%d:L:%d", 15, SALT, lux);
-			snprintf ( message, 15, "%d:L:%d", SALT, lux );
-			len = strlen(message);
-			break;
-		default:
-			// message = "Lol ça marche pas";
-			// len = strlen(message);
-			break;
-	}
-
-	memcpy((char*)&(cc_tx_buff[0]), message, len);
+	char message[50];
+	int len = 50;
+	snprintf ( message, 50, "%d:%d:T=%d,H=%d,P=%d,I=%d,U=%d,L=%d\n", 
+		SALT, 
+		ID, 
+		temp, 
+		humidity,
+		pressure,
+		ir,
+		uv,
+		lux 
+	);
+	// switch (indexValueToSend%NB_VALUES){
+	// 	case 0:
+	// 		// message = snprintf("%d:T:%d", SALT, temp);
+	// 		snprintf ( message, 15, "%d:T:%d", SALT, temp );
+	// 		len = strlen(message);
+	// 		break;
+	// 	case 1:
+	// 		// message = snprintf("%d:H:%d", 15, SALT, humidity);
+	// 		snprintf ( message, 15, "%d:H:%d", SALT, humidity );
+	// 		len = strlen(message);
+	// 		break;
+	// 	case 2:
+	// 		// message = snprintf("%d:P:%d", 15, SALT, pressure);
+	// 		snprintf ( message, 15, "%d:P:%d", SALT, pressure );
+	// 		len = strlen(message);
+	// 		break;
+	// 	case 3:
+	// 		// message = snprintf("%d:I:%d", 15, SALT, ir);
+	// 		snprintf ( message, 15, "%d:I:%d", SALT, ir );
+	// 		len = strlen(message);
+	// 		break;
+	// 	case 4:
+	// 		// message = snprintf("%d:U:%d", 15, SALT, uv);
+	// 		snprintf ( message, 15, "%d:U:%d", SALT, uv );
+	// 		len = strlen(message);
+	// 		break;
+	// 	case 5:
+	// 		// message = snprintf("%d:L:%d", 15, SALT, lux);
+	// 		snprintf ( message, 15, "%d:L:%d", SALT, lux );
+	// 		len = strlen(message);
+	// 		break;
+	// 	default:
+	// 		// message = "Lol ça marche pas";
+	// 		// len = strlen(message);
+	// 		break;
+	// }
+	memcpy((char*)cc_tx_buff, message, len);
 	cc_ptr = len;
     cc_tx=1;
-	indexValueToSend ++;
+	// indexValueToSend ++;
 }
 
 void send_on_rf(void)
@@ -283,7 +293,7 @@ void send_on_rf(void)
 	uprintf(UART0, "Tx ret: %d\n\r", ret);
     uprintf(UART0, "RF: data lenght: %d.\n\r", cc_tx_data[0]);
     uprintf(UART0, "RF: destination: %x.\n\r", cc_tx_data[1]);
-    uprintf(UART0, "RF: message: %c.\n\r", cc_tx_data[2]);
+    uprintf(UART0, "RF: message: %s.\n\r", cc_tx_data+2);
 #endif
 }
 

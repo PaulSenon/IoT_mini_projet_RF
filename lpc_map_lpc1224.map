@@ -773,6 +773,8 @@ Discarded input sections
                 0x0000000000000000       0x28 objs/apps/rf_sub1G/oled/main.o
  .rodata.temp_alert
                 0x0000000000000000        0x3 objs/apps/rf_sub1G/oled/main.o
+ .bss.indexValueToSend
+                0x0000000000000000        0x4 objs/apps/rf_sub1G/oled/main.o
  .rodata.cc1101_gdo2
                 0x0000000000000000        0x3 objs/apps/rf_sub1G/oled/main.o
  .data.chenillard_active
@@ -840,7 +842,7 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000010000fe0                _end_stack = ((_sram_base + _sram_size) - 0x20)
                 0x0000000000000000                . = ORIGIN (flash)
 
-.text           0x0000000000000000     0x3a40
+.text           0x0000000000000000     0x39c4
  FILL mask 0xff
  *(SORT(.vectors))
  .vectors       0x0000000000000000       0xc0 objs/core/bootstrap.o
@@ -1165,141 +1167,138 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000000002994        0xc objs/apps/rf_sub1G/oled/main.o
                 0x0000000000002994                periodic_display
  .text.mettageDansLeBuffer
-                0x00000000000029a0       0xe8 objs/apps/rf_sub1G/oled/main.o
+                0x00000000000029a0       0x7c objs/apps/rf_sub1G/oled/main.o
                 0x00000000000029a0                mettageDansLeBuffer
  .text.fault_info
-                0x0000000000002a88        0xc objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002a88                fault_info
+                0x0000000000002a1c        0xc objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002a1c                fault_info
  .text.rf_config
-                0x0000000000002a94       0x58 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002a94                rf_config
+                0x0000000000002a28       0x58 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002a28                rf_config
  .text.handle_rf_rx_data
-                0x0000000000002aec       0x6c objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002aec                handle_rf_rx_data
+                0x0000000000002a80       0x6c objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002a80                handle_rf_rx_data
  .text.send_on_rf
-                0x0000000000002b58       0xa0 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002b58                send_on_rf
+                0x0000000000002aec       0xa0 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002aec                send_on_rf
  .text.lux_config
-                0x0000000000002bf8       0x24 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002bf8                lux_config
+                0x0000000000002b8c       0x24 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002b8c                lux_config
  .text.lux_display
-                0x0000000000002c1c       0x50 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002c1c                lux_display
+                0x0000000000002bb0       0x50 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002bb0                lux_display
  .text.bme_config
-                0x0000000000002c6c       0x24 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002c6c                bme_config
+                0x0000000000002c00       0x24 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002c00                bme_config
  .text.bme_display
-                0x0000000000002c90       0xd4 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002c90                bme_display
+                0x0000000000002c24       0xd4 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002c24                bme_display
  .text.uv_config
-                0x0000000000002d64       0x24 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002d64                uv_config
+                0x0000000000002cf8       0x24 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002cf8                uv_config
  .text.uv_display
-                0x0000000000002d88       0x34 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002d88                uv_display
+                0x0000000000002d1c       0x34 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002d1c                uv_display
  .text.WAKEUP_Handler
-                0x0000000000002dbc        0x4 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002dbc                WAKEUP_Handler
+                0x0000000000002d50        0x4 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002d50                WAKEUP_Handler
  .text.display_line
-                0x0000000000002dc0       0x84 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002dc0                display_line
+                0x0000000000002d54       0x84 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002d54                display_line
  .text.startup.main
-                0x0000000000002e44      0x238 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000002e44                main
+                0x0000000000002dd8      0x238 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002dd8                main
  *(SORT(.rodata*))
- *fill*         0x000000000000307c        0x4 ff
- .rodata.font   0x0000000000003080      0x2f8 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000003080                font
+ .rodata.font   0x0000000000003010      0x2f8 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003010                font
  .rodata.__FUNCTION__.3723
-                0x0000000000003378        0xc objs/core/fault_handlers.o
+                0x0000000000003308        0xc objs/core/fault_handlers.o
  .rodata.__FUNCTION__.3731
-                0x0000000000003384        0xc objs/core/fault_handlers.o
+                0x0000000000003314        0xc objs/core/fault_handlers.o
  .rodata.__FUNCTION__.3727
-                0x0000000000003390       0x12 objs/core/fault_handlers.o
- *fill*         0x00000000000033a2        0x2 ff
+                0x0000000000003320       0x12 objs/core/fault_handlers.o
+ *fill*         0x0000000000003332        0x2 ff
  .rodata.__FUNCTION__.3735
-                0x00000000000033a4        0xf objs/core/fault_handlers.o
- *fill*         0x00000000000033b3        0x1 ff
+                0x0000000000003334        0xf objs/core/fault_handlers.o
+ *fill*         0x0000000000003343        0x1 ff
  .rodata.pio_regs_handles_port0
-                0x00000000000033b4       0x80 objs/core/pio.o
+                0x0000000000003344       0x80 objs/core/pio.o
  .rodata.pio_regs_handles_port1
-                0x0000000000003434       0x1c objs/core/pio.o
+                0x00000000000033c4       0x1c objs/core/pio.o
  .rodata.pio_regs_handles_port2
-                0x0000000000003450       0x40 objs/core/pio.o
+                0x00000000000033e0       0x40 objs/core/pio.o
  .rodata.status_led
-                0x0000000000003490       0x2c objs/extdrv/status_led.o
- .rodata.steps  0x00000000000034bc        0xb objs/extdrv/status_led.o
- *fill*         0x00000000000034c7        0x1 ff
+                0x0000000000003420       0x2c objs/extdrv/status_led.o
+ .rodata.steps  0x000000000000344c        0xb objs/extdrv/status_led.o
+ *fill*         0x0000000000003457        0x1 ff
  .rodata.rf_init_settings
-                0x00000000000034c8       0x48 objs/extdrv/cc1101.o
+                0x0000000000003458       0x48 objs/extdrv/cc1101.o
  .rodata.set_gpio_callback
-                0x0000000000003510       0x14 objs/drivers/gpio.o
+                0x00000000000034a0       0x14 objs/drivers/gpio.o
  .rodata.uart_defs
-                0x0000000000003524       0x10 objs/drivers/serial.o
+                0x00000000000034b4       0x10 objs/drivers/serial.o
  .rodata.I2C_0_Handler
-                0x0000000000003534      0x164 objs/drivers/i2c.o
+                0x00000000000034c4      0x164 objs/drivers/i2c.o
  .rodata.CSWTCH.3
-                0x0000000000003698       0x18 objs/drivers/i2c.o
+                0x0000000000003628       0x18 objs/drivers/i2c.o
  .rodata.vsnprintf
-                0x00000000000036b0       0xc8 objs/lib/vsprintf.o
+                0x0000000000003640       0xc8 objs/lib/vsprintf.o
  .rodata.digits.3755
-                0x0000000000003778       0x10 objs/lib/vsprintf.o
- .rodata.mettageDansLeBuffer
-                0x0000000000003788       0x18 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003708       0x10 objs/lib/vsprintf.o
  .rodata.status_led_red
-                0x00000000000037a0        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000037a0                status_led_red
- *fill*         0x00000000000037a3        0x1 ff
+                0x0000000000003718        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003718                status_led_red
+ *fill*         0x000000000000371b        0x1 ff
  .rodata.status_led_green
-                0x00000000000037a4        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000037a4                status_led_green
- *fill*         0x00000000000037a7        0x1 ff
+                0x000000000000371c        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x000000000000371c                status_led_green
+ *fill*         0x000000000000371f        0x1 ff
  .rodata.button
-                0x00000000000037a8        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000037a8                button
- *fill*         0x00000000000037ab        0x1 ff
+                0x0000000000003720        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003720                button
+ *fill*         0x0000000000003723        0x1 ff
  .rodata.str1.4
-                0x00000000000037ac      0x240 objs/apps/rf_sub1G/oled/main.o
-                                        0x23f (size before relaxing)
+                0x0000000000003724      0x24c objs/apps/rf_sub1G/oled/main.o
+                                        0x24b (size before relaxing)
  .rodata.cc1101_gdo0
-                0x00000000000039ec        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000039ec                cc1101_gdo0
- *fill*         0x00000000000039ef        0x1 ff
+                0x0000000000003970        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003970                cc1101_gdo0
+ *fill*         0x0000000000003973        0x1 ff
  .rodata.common_pins
-                0x00000000000039f0       0x48 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000039f0                common_pins
+                0x0000000000003974       0x48 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003974                common_pins
  .rodata.cc1101_miso_pin
-                0x0000000000003a38        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000003a38                cc1101_miso_pin
- *fill*         0x0000000000003a3b        0x1 ff
+                0x00000000000039bc        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x00000000000039bc                cc1101_miso_pin
+ *fill*         0x00000000000039bf        0x1 ff
  .rodata.cc1101_cs_pin
-                0x0000000000003a3c        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000003a3c                cc1101_cs_pin
+                0x00000000000039c0        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x00000000000039c0                cc1101_cs_pin
  *(SORT(.got*))
-                0x0000000000003a40                . = ALIGN (0x4)
- *fill*         0x0000000000003a3f        0x1 ff
-                0x0000000000003a40                _end_text = .
+                0x00000000000039c4                . = ALIGN (0x4)
+ *fill*         0x00000000000039c3        0x1 ff
+                0x00000000000039c4                _end_text = .
 
-.glue_7         0x0000000000003a40        0x0
- .glue_7        0x0000000000003a40        0x0 linker stubs
+.glue_7         0x00000000000039c4        0x0
+ .glue_7        0x00000000000039c4        0x0 linker stubs
 
-.glue_7t        0x0000000000003a40        0x0
- .glue_7t       0x0000000000003a40        0x0 linker stubs
+.glue_7t        0x00000000000039c4        0x0
+ .glue_7t       0x00000000000039c4        0x0 linker stubs
 
-.vfp11_veneer   0x0000000000003a40        0x0
- .vfp11_veneer  0x0000000000003a40        0x0 linker stubs
+.vfp11_veneer   0x00000000000039c4        0x0
+ .vfp11_veneer  0x00000000000039c4        0x0 linker stubs
 
-.v4_bx          0x0000000000003a40        0x0
- .v4_bx         0x0000000000003a40        0x0 linker stubs
+.v4_bx          0x00000000000039c4        0x0
+ .v4_bx         0x00000000000039c4        0x0 linker stubs
 
-.iplt           0x0000000000003a40        0x0
- .iplt          0x0000000000003a40        0x0 objs/core/watchdog.o
+.iplt           0x00000000000039c4        0x0
+ .iplt          0x00000000000039c4        0x0 objs/core/watchdog.o
 
-.rel.dyn        0x0000000000003a40        0x0
- .rel.iplt      0x0000000000003a40        0x0 objs/core/watchdog.o
-                0x0000000000003a40                . = ALIGN (0x4)
+.rel.dyn        0x00000000000039c4        0x0
+ .rel.iplt      0x00000000000039c4        0x0 objs/core/watchdog.o
+                0x00000000000039c4                . = ALIGN (0x4)
 
-.data           0x0000000010000000      0x21e load address 0x0000000000003a40
+.data           0x0000000010000000      0x21e load address 0x00000000000039c4
                 0x0000000010000000                _start_data = .
  *(SORT(.data*))
  .data.lpc_private
@@ -1333,11 +1332,11 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000010000218                tsl256x_sensor
                 0x000000001000021e                _end_data = .
 
-.igot.plt       0x0000000010000220        0x0 load address 0x0000000000003c5e
+.igot.plt       0x0000000010000220        0x0 load address 0x0000000000003be2
  .igot.plt      0x0000000010000220        0x0 objs/core/watchdog.o
                 0x0000000010000220                . = ALIGN (0x4)
 
-.bss            0x0000000010000220      0x5ac load address 0x0000000000003c5e
+.bss            0x0000000010000220      0x5a8 load address 0x0000000000003be2
                 0x0000000010000220                _start_bss = .
  *(SORT(.bss*))
  .bss.wdt_callback
@@ -1382,32 +1381,29 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000010000364                temp
  .bss.cc_tx     0x0000000010000368        0x4 objs/apps/rf_sub1G/oled/main.o
  .bss.check_rx  0x000000001000036c        0x4 objs/apps/rf_sub1G/oled/main.o
- .bss.indexValueToSend
-                0x0000000010000370        0x4 objs/apps/rf_sub1G/oled/main.o
-                0x0000000010000370                indexValueToSend
- .bss.gddram    0x0000000010000374      0x404 objs/apps/rf_sub1G/oled/main.o
- .bss.lux       0x0000000010000778        0x4 objs/apps/rf_sub1G/oled/main.o
-                0x0000000010000778                lux
+ .bss.gddram    0x0000000010000370      0x404 objs/apps/rf_sub1G/oled/main.o
+ .bss.lux       0x0000000010000774        0x4 objs/apps/rf_sub1G/oled/main.o
+                0x0000000010000774                lux
  .bss.cc_tx_buff
-                0x000000001000077c       0x40 objs/apps/rf_sub1G/oled/main.o
- .bss.uv        0x00000000100007bc        0x2 objs/apps/rf_sub1G/oled/main.o
-                0x00000000100007bc                uv
- .bss.ir        0x00000000100007be        0x2 objs/apps/rf_sub1G/oled/main.o
-                0x00000000100007be                ir
- .bss.humidity  0x00000000100007c0        0x2 objs/apps/rf_sub1G/oled/main.o
-                0x00000000100007c0                humidity
+                0x0000000010000778       0x40 objs/apps/rf_sub1G/oled/main.o
+ .bss.uv        0x00000000100007b8        0x2 objs/apps/rf_sub1G/oled/main.o
+                0x00000000100007b8                uv
+ .bss.ir        0x00000000100007ba        0x2 objs/apps/rf_sub1G/oled/main.o
+                0x00000000100007ba                ir
+ .bss.humidity  0x00000000100007bc        0x2 objs/apps/rf_sub1G/oled/main.o
+                0x00000000100007bc                humidity
  .bss.periodic_match
-                0x00000000100007c2        0x1 objs/drivers/rtc.o
- .bss.cc_ptr    0x00000000100007c3        0x1 objs/apps/rf_sub1G/oled/main.o
- .bss.loop.4899
-                0x00000000100007c4        0x1 objs/apps/rf_sub1G/oled/main.o
+                0x00000000100007be        0x1 objs/drivers/rtc.o
+ .bss.loop.4891
+                0x00000000100007bf        0x1 objs/apps/rf_sub1G/oled/main.o
+ .bss.cc_ptr    0x00000000100007c0        0x1 objs/apps/rf_sub1G/oled/main.o
  *(SORT(COMMON))
- *fill*         0x00000000100007c5        0x3 
- COMMON         0x00000000100007c8        0x4 objs/core/rom_helpers.o
-                0x00000000100007c8                iap_entry
-                0x00000000100007cc                _end_bss = .
-                0x00000000100007cc                . = ALIGN (0x4)
-                0x00000000100007cc                _end = .
+ *fill*         0x00000000100007c1        0x3 
+ COMMON         0x00000000100007c4        0x4 objs/core/rom_helpers.o
+                0x00000000100007c4                iap_entry
+                0x00000000100007c8                _end_bss = .
+                0x00000000100007c8                . = ALIGN (0x4)
+                0x00000000100007c8                _end = .
                 [!provide]                        PROVIDE (end, .)
 OUTPUT(apps/rf_sub1G/oled/oled.elf elf32-littlearm)
 
