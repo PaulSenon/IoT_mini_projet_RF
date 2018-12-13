@@ -170,7 +170,7 @@ int isRigthSalt(char* message){
 }
 
 uint8_t chenillard_active = 1;
-char screen_config[RF_BUFF_LEN];
+char *screen_config = "THL";
 void handle_rf_rx_data(void)
 {
 	uint8_t data[RF_BUFF_LEN];
