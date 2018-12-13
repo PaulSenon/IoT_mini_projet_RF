@@ -60,7 +60,7 @@
 #define DEVICE_ADDRESS  0x34 /* Addresses 0x00 and 0xFF are broadcast */
 #define NEIGHBOR_ADDRESS 0x61 /* Address of the associated device */
 
-#define SALT 1567464
+#define SALT "1567464"
 #define ID 1
 
 uint16_t uv = 0, ir = 0, humidity = 0;
@@ -158,7 +158,19 @@ void rf_config(void)
 #endif
 }
 
+int isRigthSalt(char* message){
+	int i;
+	char* salt = SALT;
+	for(i=0; i<sizeof(salt); i++){
+		if(message[i] != salt[i]){
+			return 0;
+		}
+	}
+	return 1;
+}
+
 uint8_t chenillard_active = 1;
+char screen_config[RF_BUFF_LEN];
 void handle_rf_rx_data(void)
 {
 	uint8_t data[RF_BUFF_LEN];
@@ -169,14 +181,27 @@ void handle_rf_rx_data(void)
 	ret = cc1101_receive_packet(data, RF_BUFF_LEN, &status);
 	/* Go back to RX mode */
 	cc1101_enter_rx_mode();
-	uprintf(UART0, "DATA: %s\n\r", data);
+	if(isRigthSalt(data+2)){
+		char* message = (data+2);
+		int i;
+		char result[3];
+		for(i=0;i<3;i++){
+			char tmp = message+(sizeof(SALT)+i);
+			if(tmp == 'T' || tmp == 'L' || tmp == 'H'){
+				result[i] = tmp;
+			}else{
+				return;
+			}
+		}
+		memcpy(screen_config, message, sizeof(message));
+	}
 
-#ifdef DEBUG
-	uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
-    uprintf(UART0, "RF: data lenght: %d.\n\r", data[0]);
-    uprintf(UART0, "RF: destination: %x.\n\r", data[1]);
-    uprintf(UART0, "RF: message: %c.\n\r", data[2]);
-#endif
+// #ifdef DEBUG
+// 	uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
+//     uprintf(UART0, "RF: data lenght: %d.\n\r", data[0]);
+//     uprintf(UART0, "RF: destination: %x.\n\r", data[1]);
+//     uprintf(UART0, "RF: message: %c.\n\r", data[2]);
+// #endif
 	// switch (data[2]) {
 	// 	case '0':
 	// 		{
@@ -287,14 +312,16 @@ void send_on_rf(void)
 	}
 	ret = cc1101_send_packet(cc_tx_data, (tx_len + 2));
 
-#ifdef DEBUG
-	uprintf(UART0, "BUFF %s \n\r", cc_tx_buff);
-	uprintf(UART0, "DATA %s \n\r", cc_tx_data);
-	uprintf(UART0, "Tx ret: %d\n\r", ret);
-    uprintf(UART0, "RF: data lenght: %d.\n\r", cc_tx_data[0]);
-    uprintf(UART0, "RF: destination: %x.\n\r", cc_tx_data[1]);
-    uprintf(UART0, "RF: message: %s.\n\r", cc_tx_data+2);
-#endif
+	
+
+// #ifdef DEBUG
+// 	uprintf(UART0, "BUFF %s \n\r", cc_tx_buff);
+// 	uprintf(UART0, "DATA %s \n\r", cc_tx_data);
+// 	uprintf(UART0, "Tx ret: %d\n\r", ret);
+//     uprintf(UART0, "RF: data lenght: %d.\n\r", cc_tx_data[0]);
+//     uprintf(UART0, "RF: destination: %x.\n\r", cc_tx_data[1]);
+//     uprintf(UART0, "RF: message: %s.\n\r", cc_tx_data+2);
+// #endif
 }
 
 /***************************************************************************** */
@@ -628,14 +655,36 @@ int main(void)
 			// temp_display(UART0, &deci_degrees);
 
 			/* Update display */
-			snprintf(data, 20, "UV: %d", uv);
-			display_line(1, 0, data);
-			snprintf(data, 20, "IR: %d  LUX: %d", ir, lux);
-			display_line(3, 0, data);
-			snprintf(data, 20, "P: %d H: %d", pressure, humidity);
-			display_line(5, 0, data);
-			snprintf(data, 20, "TMP: %d,%d", temp/10, temp%10);
-			display_line(6, 0, data);
+			int i;
+			for(i=0;i<3;i++){
+				switch (screen_config[i]){
+					case 'T':
+						snprintf(data, 20, "TMP: %d,%d", temp/10, temp%10);
+						display_line(i, 0, data);
+						break;
+					case 'H':
+						snprintf(data, 20, "H: %d", humidity);
+						display_line(i, 0, data);
+						break;
+					case 'L':
+						snprintf(data, 20, "LUX: %d", lux);
+						display_line(i, 0, data);
+						break;
+				}
+			}
+
+			
+			// snprintf(data, 20, "UV: %d", uv);
+			// display_line(1, 0, data);
+			// snprintf(data, 20, "IR: %d  LUX: %d", ir, lux);
+			// display_line(3, 0, data);
+			// snprintf(data, 20, "P: %d H: %d", pressure, humidity);
+			// display_line(5, 0, data);
+			// snprintf(data, 20, "TMP: %d,%d", temp/10, temp%10);
+			// display_line(6, 0, data);
+
+
+
 			// snprintf(data, 20, "CPE Lyon");
 			// display_line(3, 0, data);
 			/* And send to screen */
