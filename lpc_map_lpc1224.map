@@ -773,6 +773,8 @@ Discarded input sections
                 0x0000000000000000       0x28 objs/apps/rf_sub1G/oled/main.o
  .rodata.temp_alert
                 0x0000000000000000        0x3 objs/apps/rf_sub1G/oled/main.o
+ .rodata.button
+                0x0000000000000000        0x3 objs/apps/rf_sub1G/oled/main.o
  .bss.indexValueToSend
                 0x0000000000000000        0x4 objs/apps/rf_sub1G/oled/main.o
  .rodata.cc1101_gdo2
@@ -842,7 +844,7 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000010000fe0                _end_stack = ((_sram_base + _sram_size) - 0x20)
                 0x0000000000000000                . = ORIGIN (flash)
 
-.text           0x0000000000000000     0x39c4
+.text           0x0000000000000000     0x39bc
  FILL mask 0xff
  *(SORT(.vectors))
  .vectors       0x0000000000000000       0xc0 objs/core/bootstrap.o
@@ -1206,9 +1208,10 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000000002d54       0x84 objs/apps/rf_sub1G/oled/main.o
                 0x0000000000002d54                display_line
  .text.startup.main
-                0x0000000000002dd8      0x238 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000002dd8      0x234 objs/apps/rf_sub1G/oled/main.o
                 0x0000000000002dd8                main
  *(SORT(.rodata*))
+ *fill*         0x000000000000300c        0x4 ff
  .rodata.font   0x0000000000003010      0x2f8 objs/apps/rf_sub1G/oled/main.o
                 0x0000000000003010                font
  .rodata.__FUNCTION__.3723
@@ -1253,52 +1256,48 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x000000000000371c        0x3 objs/apps/rf_sub1G/oled/main.o
                 0x000000000000371c                status_led_green
  *fill*         0x000000000000371f        0x1 ff
- .rodata.button
-                0x0000000000003720        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000003720                button
- *fill*         0x0000000000003723        0x1 ff
  .rodata.str1.4
-                0x0000000000003724      0x24c objs/apps/rf_sub1G/oled/main.o
-                                        0x24b (size before relaxing)
+                0x0000000000003720      0x248 objs/apps/rf_sub1G/oled/main.o
+                                        0x247 (size before relaxing)
  .rodata.cc1101_gdo0
-                0x0000000000003970        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000003970                cc1101_gdo0
- *fill*         0x0000000000003973        0x1 ff
+                0x0000000000003968        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x0000000000003968                cc1101_gdo0
+ *fill*         0x000000000000396b        0x1 ff
  .rodata.common_pins
-                0x0000000000003974       0x48 objs/apps/rf_sub1G/oled/main.o
-                0x0000000000003974                common_pins
+                0x000000000000396c       0x48 objs/apps/rf_sub1G/oled/main.o
+                0x000000000000396c                common_pins
  .rodata.cc1101_miso_pin
-                0x00000000000039bc        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000039bc                cc1101_miso_pin
- *fill*         0x00000000000039bf        0x1 ff
+                0x00000000000039b4        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x00000000000039b4                cc1101_miso_pin
+ *fill*         0x00000000000039b7        0x1 ff
  .rodata.cc1101_cs_pin
-                0x00000000000039c0        0x3 objs/apps/rf_sub1G/oled/main.o
-                0x00000000000039c0                cc1101_cs_pin
+                0x00000000000039b8        0x3 objs/apps/rf_sub1G/oled/main.o
+                0x00000000000039b8                cc1101_cs_pin
  *(SORT(.got*))
-                0x00000000000039c4                . = ALIGN (0x4)
- *fill*         0x00000000000039c3        0x1 ff
-                0x00000000000039c4                _end_text = .
+                0x00000000000039bc                . = ALIGN (0x4)
+ *fill*         0x00000000000039bb        0x1 ff
+                0x00000000000039bc                _end_text = .
 
-.glue_7         0x00000000000039c4        0x0
- .glue_7        0x00000000000039c4        0x0 linker stubs
+.glue_7         0x00000000000039bc        0x0
+ .glue_7        0x00000000000039bc        0x0 linker stubs
 
-.glue_7t        0x00000000000039c4        0x0
- .glue_7t       0x00000000000039c4        0x0 linker stubs
+.glue_7t        0x00000000000039bc        0x0
+ .glue_7t       0x00000000000039bc        0x0 linker stubs
 
-.vfp11_veneer   0x00000000000039c4        0x0
- .vfp11_veneer  0x00000000000039c4        0x0 linker stubs
+.vfp11_veneer   0x00000000000039bc        0x0
+ .vfp11_veneer  0x00000000000039bc        0x0 linker stubs
 
-.v4_bx          0x00000000000039c4        0x0
- .v4_bx         0x00000000000039c4        0x0 linker stubs
+.v4_bx          0x00000000000039bc        0x0
+ .v4_bx         0x00000000000039bc        0x0 linker stubs
 
-.iplt           0x00000000000039c4        0x0
- .iplt          0x00000000000039c4        0x0 objs/core/watchdog.o
+.iplt           0x00000000000039bc        0x0
+ .iplt          0x00000000000039bc        0x0 objs/core/watchdog.o
 
-.rel.dyn        0x00000000000039c4        0x0
- .rel.iplt      0x00000000000039c4        0x0 objs/core/watchdog.o
-                0x00000000000039c4                . = ALIGN (0x4)
+.rel.dyn        0x00000000000039bc        0x0
+ .rel.iplt      0x00000000000039bc        0x0 objs/core/watchdog.o
+                0x00000000000039bc                . = ALIGN (0x4)
 
-.data           0x0000000010000000      0x21e load address 0x00000000000039c4
+.data           0x0000000010000000      0x21e load address 0x00000000000039bc
                 0x0000000010000000                _start_data = .
  *(SORT(.data*))
  .data.lpc_private
@@ -1332,11 +1331,11 @@ LOAD objs/apps/rf_sub1G/oled/main.o
                 0x0000000010000218                tsl256x_sensor
                 0x000000001000021e                _end_data = .
 
-.igot.plt       0x0000000010000220        0x0 load address 0x0000000000003be2
+.igot.plt       0x0000000010000220        0x0 load address 0x0000000000003bda
  .igot.plt      0x0000000010000220        0x0 objs/core/watchdog.o
                 0x0000000010000220                . = ALIGN (0x4)
 
-.bss            0x0000000010000220      0x5a8 load address 0x0000000000003be2
+.bss            0x0000000010000220      0x5a8 load address 0x0000000000003bda
                 0x0000000010000220                _start_bss = .
  *(SORT(.bss*))
  .bss.wdt_callback

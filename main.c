@@ -216,7 +216,7 @@ int indexValueToSend = 0;
 void mettageDansLeBuffer(uint32_t gpio){
 	char message[50];
 	int len = 50;
-	snprintf ( message, 50, "%d:%d:T=%d,H=%d,P=%d,I=%d,U=%d,L=%d\n", 
+	snprintf ( message, 50, "%d:%d:T=%d,H=%d,P=%d,I=%d,U=%d,L=%d", 
 		SALT, 
 		ID, 
 		temp, 
@@ -558,7 +558,7 @@ int main(void)
 	lux_config(UART0);
 
 	/* Activate the chenillard on Rising edge (button release) */
-	set_gpio_callback(mettageDansLeBuffer, &button, EDGE_RISING);
+	//set_gpio_callback(mettageDansLeBuffer, &button, EDGE_RISING);
 
 	/* Configure and start display */
 	ret = ssd130x_display_on(&display);
@@ -569,6 +569,8 @@ int main(void)
 
 	/* Add periodic handler */
 	add_systick_callback(periodic_display, 1000);
+
+	add_systick_callback(mettageDansLeBuffer, 1000);
 
 	uprintf(UART0, "App started\n\r");
 
