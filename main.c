@@ -186,7 +186,7 @@ void handle_rf_rx_data(void)
 		int i;
 		char result[3];
 		for(i=0;i<3;i++){
-			char tmp = message+(sizeof(SALT)+i);
+			char tmp = message+(sizeof(SALT)+1+i);
 			if(tmp == 'T' || tmp == 'L' || tmp == 'H'){
 				result[i] = tmp;
 			}else{
