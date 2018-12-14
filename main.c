@@ -170,31 +170,40 @@ int isRigthSalt(char* message){
 }
 
 uint8_t chenillard_active = 1;
-char *screen_config = "THL";
+char volatile screen_config[] = "THL";
 void handle_rf_rx_data(void)
 {
 	uint8_t data[RF_BUFF_LEN];
 	int8_t ret = 0;
-	uint8_t status = 0;
+	uint8_t status = 0;      
 
 	/* Check for received packet (and get it if any) */
 	ret = cc1101_receive_packet(data, RF_BUFF_LEN, &status);
 	/* Go back to RX mode */
 	cc1101_enter_rx_mode();
+	uprintf(UART0, "RF: message: %s\n\r", data+2);
 	if(isRigthSalt(data+2)){
 		char* message = (data+2);
 		int i;
-		char result[3];
+		//char result[4];
 		for(i=0;i<3;i++){
-			char tmp = message+(sizeof(SALT)+1+i);
+			char tmp = message[sizeof(SALT)+i];
+			uprintf(UART0, "tmp => : %c\n\r", tmp);
 			if(tmp == 'T' || tmp == 'L' || tmp == 'H'){
-				result[i] = tmp;
+				//result[i] = tmp;
+				memset(screen_config +i, tmp, sizeof(char));
 			}else{
 				return;
 			}
+			uprintf(UART0, "result => : %s\n\r", screen_config);
 		}
-		memcpy(screen_config, message, sizeof(message));
+		//result[4] = '\0';
+		//uprintf(UART0, "fin => : %s\n\r", result);
+		//memcpy((char*)screen_config, result, 3);
+		//screen_config = result;
+		uprintf(UART0, "fin => : %s\n\r", screen_config);
 	}
+
 
 // #ifdef DEBUG
 // 	uprintf(UART0, "RF: ret:%d, st: %d.\n\r", ret, status);
@@ -241,7 +250,7 @@ int indexValueToSend = 0;
 void mettageDansLeBuffer(uint32_t gpio){
 	char message[50];
 	int len = 50;
-	snprintf ( message, 50, "%d:%d:T=%d,H=%d,P=%d,I=%d,U=%d,L=%d", 
+	snprintf ( message, 50, "%s:%d:T=%d,H=%d,P=%d,I=%d,U=%d,L=%d", 
 		SALT, 
 		ID, 
 		temp, 
@@ -600,7 +609,6 @@ int main(void)
 	add_systick_callback(mettageDansLeBuffer, 1000);
 
 	uprintf(UART0, "App started\n\r");
-
 	while (1) {
 		uint8_t status = 0;
 
@@ -672,6 +680,9 @@ int main(void)
 						break;
 				}
 			}
+
+			snprintf(data, 20, "%s", screen_config);
+			display_line(5, 0, data);
 
 			
 			// snprintf(data, 20, "UV: %d", uv);
